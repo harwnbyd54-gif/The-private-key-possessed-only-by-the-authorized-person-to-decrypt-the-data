@@ -1,0 +1,59 @@
+class InfoShieldSystem:
+    def __init__(self, secret_key: float):
+        # المفتاح الخاص الذي يمتلكه المخول فقط لفك التشفير
+        self.secret_key = secret_key
+
+    def encrypt(self, data: float) -> float:
+        """
+        1. طبقة البناء والخلط (العملية الأمامية)
+        تدمج البيانات مع المفتاح عبر الضرب والجمع لتعقيد الناتج.
+        """
+        # درع الامتصاص: إذا دخل صفر، يبتلع النظام المعلومات ويصفر الناتج فوراً
+        if data == 0 or self.secret_key == 0:
+            return 0.0
+        
+        # العملية الأمامية المركبة
+        result = (data * self.secret_key) + data
+        return result
+
+    def decrypt(self, encrypted_result: float) -> float:
+        """
+        3. طبقة المفتاح والوصول (الدالة العكسية المباشرة)
+        تفك الشفرة بضربة واحدة باستخدام المفتاح، ما لم يكن الصفر قد دمر الأثر.
+        """
+        # جدار الحماية ضد الصفر أو محاولات التفكيك الباطلة
+        if encrypted_result == 0.0 or self.secret_key == -1:
+            return 0.0  # الصفر محا المعلومات تماماً (نقطة لا رجعة فيها)
+        
+        # معادلة العكس المباشرة لإرجاع البيانات الأصلية
+        original_data = encrypted_result / (self.secret_key + 1)
+        return original_data
+
+
+# --- اختبار النظام متكامل الأركان ---
+
+# إعداد النظام بمفتاح سري (مثلاً: 4)
+my_system = InfoShieldSystem(secret_key=4.0)
+
+print("--- التجربة الأولى: التشغيل السليم والوصول بالمفتاح ---")
+original_value = 15.5
+print(f"البيانات الأصلية قبل التشفير: {original_value}")
+
+# 1. التشفير (العملية الأمامية)
+encrypted = my_system.encrypt(original_value)
+print(f"الناتج المشفر (بعد الدمج): {encrypted}")
+
+# 2. فك التشفير (الدالة العكسية باستخدام المفتاح)
+decrypted = my_system.decrypt(encrypted)
+print(f"البيانات المسترجعة بعد فك التشفير: {decrypted}")
+
+
+print("\n--- التجربة الثانية: تفعيل درع الصفر (تدمير المعلومات) ---")
+# محاولة تمرير قيمة صفرية أو حدوث خلل يؤدي للصفر
+attack_or_zero_data = 0.0
+encrypted_zero = my_system.encrypt(attack_or_zero_data)
+print(f"الناتج بعد اصطدامه بدرع الصفر: {encrypted_zero}")
+
+# محاولة فك الشفرة بعد الامتصاص
+decrypted_zero = my_system.decrypt(encrypted_zero)
+print(f"محاولة الاسترجاع بعد الابتلاع: {decrypted_zero} (تم محو الأثر تماماً ولا رجعة فيه)")
